@@ -8,17 +8,15 @@ require "./queen.rb"
 require "./king.rb"
 require "./pawn.rb"
 
-
-
 require 'colorize'
 
 class Board
   attr_reader :squares
 
-  def initialize()
+  def initialize(mode = :new)
     @squares = Array.new(8) { Array.new(8) }
 
-    initial_setup
+    initial_setup unless mode == :copy
   end
 
   def initial_setup
@@ -82,7 +80,6 @@ class Board
     output
   end
 
-  #does not check for legality of move
   def move(old_pos, new_pos)
     moving_piece = @squares[old_pos[0]][old_pos[1]]
     if moving_piece.is_legal?(old_pos, new_pos)
@@ -91,14 +88,120 @@ class Board
       raise ArgumentError.new "Invalid move"
     end
   end
+
+  #check if color's king is in check
+  def check?(color)
+    #find color's king
+    king_pos = king_pos(color)
+    # generates array of opponent piece locations
+    enemy_locations = locations(flip(color))
+    #is color's king's position included in any of opposite color's legal moves
+    # for each location, get piece there, get legal moves
+
+    enemy_locations.any? do |loc|
+      enemy_piece = @squares[loc[0]][loc[1]]
+      enemy_piece.is_legal?(loc, king_pos)
+    end
+  end
+
+  #check if color's king is in check mate
+  def check_mate?(color)
+    return false unless check?(color)
+
+    friendly_locations = locations(color)
+
+    friendly_locations.each do |loc|
+      friendly_piece = @squares[loc[0]][loc[1]]
+      friendly_piece.possible_moves(loc).each do |move|
+        test_board = deep_dup #done!
+        test_board.move(loc, move)
+        return false unless test_board.check?(color)
+        # is test in check?
+      end
+    end
+    return true
+  end
+
+  def flip(color)
+    color == :white ? :black : :white
+  end
+
+  def king_pos(color)
+    8.times do |row|
+      8.times do |col|
+        curr_square = @squares[row][col]
+        if curr_square.is_a?(King) && curr_square.color == color
+          return [row, col]
+        end
+      end
+    end
+  end
+
+  def locations(color)
+    locations = []
+
+    8.times do |row|
+      8.times do |col|
+        curr_square = @squares[row][col]
+        if curr_square != nil && curr_square.color == color
+          locations << [row, col]
+        end
+      end
+    end
+    locations
+  end
+
+  def deep_dup
+    dup_board = Board.new(:copy)
+
+    [:white, :black].each do |color|
+      duplicate_pieces(dup_board, locations(color), color)
+    end
+
+    dup_board
+  end
+
+  def duplicate_pieces(dup_board, locations, color)
+    locations.each do |pos|
+      y = pos[0]
+      x = pos[1]
+      dup_board.squares[y][x] = @squares[y][x].class.new(color, dup_board)
+    end
+    dup_board
+  end
+
 end
 
 b = Board.new
 puts b.display
 
-b.move([0, 4], [1, 4])
+b.move([1, 4], [2, 4])
 puts b.display
-b.move([1, 4], [2, 3])
+
+b.move([0, 3], [4, 7])
 puts b.display
-b.move([2, 3], [4, 5])
+
+puts "not yet in check!"
+puts "Is Black in check? #{b.check?(:black)}"
+puts "Is White in check? #{b.check?(:white)}"
+
+b.move([4, 7], [6, 5])
+puts b.display
+
+puts "white should be in check now!"
+puts "Is Black in check? #{b.check?(:black)}"
+puts "Is White in check? #{b.check?(:white)}"
+
+b.move([6,5], [7,4])
+puts b.display
+
+puts "Now displaying duplicate board!"
+
+c = b.deep_dup
+puts c.display
+
+c.move([0, 1], [2, 0])
+puts c.display
+
+puts "and now showing the original again!"
 puts b.display

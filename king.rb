@@ -1,7 +1,6 @@
 require "./chess_piece.rb"
-include SteppingPiece
-
 class King < ChessPiece
+  include SteppingPiece
   attr_reader :deltas
 
   def initialize(color, board)

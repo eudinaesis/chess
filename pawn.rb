@@ -22,7 +22,8 @@ class Pawn < ChessPiece
   end
 
   def is_legal_capture?(old_pos, new_pos)
-    return false if  @board[new_pos[0]][new_pos[1]] == nil
+    return false if @board.squares[new_pos[0]][new_pos[1]] == nil ||
+     @board.squares[new_pos[0]][new_pos[1]].color == self.color
 
     if self.color == :white
       if (new_pos[0] == old_pos[0] - 1) &&
