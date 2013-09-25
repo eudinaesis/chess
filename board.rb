@@ -1,3 +1,5 @@
+# maybe we should use a piece_at method... christina suggested move_delta?
+
 require "./chess_piece.rb"
 require "./sliding_piece.rb"
 require "./stepping_piece.rb"
