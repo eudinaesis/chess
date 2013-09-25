@@ -8,8 +8,13 @@ end
 
 class HumanPlayer < Player
   def play_turn
-    puts "#{self.color.to_s.capitalize} player: where would you like to move? format: a7 a6"
-    HumanPlayer::map_format(gets.chomp.downcase.split)
+    input = nil
+    begin
+      puts "#{self.color.to_s.capitalize} player: where would you like to move? format: a7 a6"
+      input = gets.chomp.downcase.match(/\A([a-h][1-8])\s([a-h][1-8])\z/)
+    end while input.nil?
+
+    HumanPlayer::map_format(input[1..2])
   end
 
   def self.map_format(input_array)
