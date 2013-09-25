@@ -1,6 +1,6 @@
 module SlidingPiece
   def is_legal?(old_pos, new_pos)
-    new_pos_obj = @board.squares[new_pos[0]][new_pos[1]]
+    new_pos_obj = @board[new_pos]
 
     legal_destinations(old_pos).include?(new_pos) &&
     (new_pos_obj == nil || new_pos_obj.color != self.color) &&
@@ -20,7 +20,7 @@ module SlidingPiece
     path.pop
 
     path.all? do |path_pos|
-      @board.squares[path_pos[0]][path_pos[1]].nil?
+      @board[path_pos].nil?
     end
   end
 
@@ -45,7 +45,7 @@ module SlidingPiece
     # print "legal dest are: #{legal_destinations(location)}\n"
     possible_moves = legal_destinations(location).select do |legal_move|
       # print "current legal move is #{legal_move}\n"
-      legal_move_obj = @board.squares[legal_move[0]][legal_move[1]]
+      legal_move_obj = @board[legal_move]
       no_piece_in_the_way?(location, legal_move) &&
         (legal_move_obj == nil || legal_move_obj.color != self.color) &&
         legal_move.all? { |coord| coord >= 0 && coord <= 8 }

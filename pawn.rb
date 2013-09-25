@@ -23,8 +23,8 @@ class Pawn < ChessPiece
   end
 
   def is_legal_capture?(old_pos, new_pos)
-    return false if @board.squares[new_pos[0]][new_pos[1]] == nil ||
-     @board.squares[new_pos[0]][new_pos[1]].color == self.color
+    return false if @board[new_pos] == nil ||
+     @board[new_pos].color == self.color
 
     if self.color == :white
       if (new_pos[0] == old_pos[0] - 1) &&
@@ -43,11 +43,19 @@ class Pawn < ChessPiece
   def possible_moves(loc)
     possible_moves = []
     if self.color == :white
+      # get out of checkmate by taking
       possible_moves << [loc[0]-1, loc[1]-1] if is_legal?(loc, [loc[0]-1, loc[1]-1])
       possible_moves << [loc[0]-1, loc[1]+1] if is_legal?(loc, [loc[0]-1, loc[1]+1])
+      # get in the way of checkmate
+      possible_moves << [loc[0]-1, loc[1]] if is_legal?(loc, [loc[0]-1, loc[1]])
+      possible_moves << [loc[0]-1, loc[1]] if is_legal?(loc, [loc[0]-1, loc[1]])
     else # black marches down
+      # get out of checkmate by taking
       possible_moves << [loc[0]+1, loc[1]-1] if is_legal?(loc, [loc[0]+1, loc[1]-1])
       possible_moves << [loc[0]+1, loc[1]+1] if is_legal?(loc, [loc[0]+1, loc[1]+1])
+      # get in the way of checkmate
+      possible_moves << [loc[0]+1, loc[1]] if is_legal?(loc, [loc[0]+1, loc[1]])
+      possible_moves << [loc[0]+1, loc[1]] if is_legal?(loc, [loc[0]+1, loc[1]])
     end
     possible_moves
   end

@@ -81,13 +81,28 @@ class Board
     output
   end
 
-  def move(old_pos, new_pos)
-    moving_piece = @squares[old_pos[0]][old_pos[1]]
-    # if moving_piece.is_legal?(old_pos, new_pos)
-    @squares[old_pos[0]][old_pos[1]], @squares[new_pos[0]][new_pos[1]] = nil, moving_piece
-    # else
-#       raise ArgumentError.new "Invalid move"
-#     end
+  def move(old_pos, new_pos, color)
+    # have move return true if legit, while changing board
+    # return false if bad, change nothing
+
+    if move_ok?(old_pos, new_pos, color)
+      actual_move(old_pos, new_pos)
+      return true
+    end
+
+    false
+  end
+
+  def move_ok?(old_pos, new_pos, color)
+    !self[old_pos].nil? &&
+    self[old_pos].color == color &&
+    self[old_pos].is_legal?(old_pos, new_pos) &&
+    !self.deep_dup.actual_move(old_pos, new_pos).check?(color)
+  end
+
+  def actual_move(old_pos, new_pos)
+    self[old_pos], self[new_pos] = nil, self[old_pos]
+    self
   end
 
   #check if color's king is in check
@@ -100,7 +115,7 @@ class Board
     # for each location, get piece there, get legal moves
 
     enemy_locations.any? do |loc|
-      enemy_piece = @squares[loc[0]][loc[1]]
+      enemy_piece = self[loc]
       enemy_piece.is_legal?(loc, king_pos)
     end
   end
@@ -112,10 +127,12 @@ class Board
     friendly_locations = locations(color)
 
     friendly_locations.each do |loc|
-      friendly_piece = @squares[loc[0]][loc[1]]
+      friendly_piece = self[loc]
+      # puts "#{friendly_piece.class} : #{p friendly_piece.possible_moves(loc)}"
       friendly_piece.possible_moves(loc).each do |move|
+        # puts "pawn looking at #{move}" if friendly_piece.class == Pawn
         test_board = deep_dup #done!
-        test_board.move(loc, move)
+        test_board.actual_move(loc, move)
         return false unless test_board.check?(color)
         # is test in check?
       end
@@ -125,6 +142,14 @@ class Board
 
   def self.flip(color)
     color == :white ? :black : :white
+  end
+
+  def [](pos)
+    @squares[pos[0]][pos[1]]
+  end
+
+  def []=(pos, new_val)
+    @squares[pos[0]][pos[1]] = new_val
   end
 
   def king_pos(color)
@@ -139,6 +164,7 @@ class Board
   end
 
   def locations(color)
+    # returns locations of color's pieces
     locations = []
 
     8.times do |row|
@@ -164,9 +190,7 @@ class Board
 
   def duplicate_pieces(dup_board, locations, color)
     locations.each do |pos|
-      y = pos[0]
-      x = pos[1]
-      dup_board.squares[y][x] = @squares[y][x].class.new(color, dup_board)
+      dup_board[pos] = self[pos].class.new(color, dup_board)
     end
     dup_board
   end

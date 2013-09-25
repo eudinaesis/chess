@@ -15,8 +15,8 @@ module SteppingPiece
     end
     on_board_steps = all_steps.reject { |position| Board::off_board?(position) }
     available_steps = on_board_steps.reject do |position|
-      @board.squares[position[0]][position[1]] != nil &&
-      @board.squares[position[0]][position[1]].color == self.color
+      @board[position] != nil &&
+      @board[position].color == self.color
     end
   end
 end
