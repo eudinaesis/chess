@@ -181,27 +181,10 @@ puts b.display
 b.move([0, 3], [4, 7])
 puts b.display
 
-puts "not yet in check!"
-puts "Is Black in check? #{b.check?(:black)}"
-puts "Is White in check? #{b.check?(:white)}"
-
 b.move([4, 7], [6, 5])
 puts b.display
 
 puts "white should be in check now!"
-puts "Is Black in check? #{b.check?(:black)}"
 puts "Is White in check? #{b.check?(:white)}"
 
-b.move([6,5], [7,4])
-puts b.display
-
-puts "Now displaying duplicate board!"
-
-c = b.deep_dup
-puts c.display
-
-c.move([0, 1], [2, 0])
-puts c.display
-
-puts "and now showing the original again!"
-puts b.display
+puts "is White in checkmate? #{b.check_mate?(:white)}"

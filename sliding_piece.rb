@@ -2,7 +2,7 @@ module SlidingPiece
   def is_legal?(old_pos, new_pos)
     new_pos_obj = @board.squares[new_pos[0]][new_pos[1]]
 
-    legal_destinations(old_pos, new_pos).include?(new_pos) &&
+    legal_destinations(old_pos).include?(new_pos) &&
     (new_pos_obj == nil || new_pos_obj.color != self.color) &&
     no_piece_in_the_way?(old_pos, new_pos)
   end
@@ -24,7 +24,7 @@ module SlidingPiece
     end
   end
 
-  def legal_destinations(old_pos, new_pos)
+  def legal_destinations(old_pos)
     legal_destinations = []
     @vectors.each do |vector|
       (1..8).each do |multiplier|
@@ -38,5 +38,17 @@ module SlidingPiece
     legal_destinations
   end
 
-  something that returns legal_destinations, minus blocked paths
+  #IN PROGRESS. NOT COMPLETE!
+  def possible_moves(old_pos)
+    # something that returns legal_destinations, minus blocked paths
+
+    possible_moves = legal_destinations(old_pos).select do |legal_move|
+      legal_move_obj = @board.squares[legal_move[0]][legal_move[1]]
+      no_piece_in_the_way?(old_pos, legal_move) &&
+        (legal_move_obj == nil || legal_move_obj.color != self.color) &&
+        legal_move.all? { |coord| coord >= 0 && coord <= 8 }
+    end
+
+    possible_moves
+  end
 end
