@@ -28,8 +28,9 @@ module SlidingPiece
     legal_destinations = []
     @vectors.each do |vector|
       (1..8).each do |multiplier|
-        legal_destinations << [old_pos[0] + (vector[0] * multiplier),
+        new_pos = [old_pos[0] + (vector[0] * multiplier),
         old_pos[1] + (vector[1] * multiplier)]
+        legal_destinations << new_pos unless Board::off_board?(new_pos)
       end
     end
     # if self.is_a?(Queen)
@@ -39,12 +40,13 @@ module SlidingPiece
   end
 
   #IN PROGRESS. NOT COMPLETE!
-  def possible_moves(old_pos)
+  def possible_moves(location)
     # something that returns legal_destinations, minus blocked paths
-
-    possible_moves = legal_destinations(old_pos).select do |legal_move|
+    # print "legal dest are: #{legal_destinations(location)}\n"
+    possible_moves = legal_destinations(location).select do |legal_move|
+      # print "current legal move is #{legal_move}\n"
       legal_move_obj = @board.squares[legal_move[0]][legal_move[1]]
-      no_piece_in_the_way?(old_pos, legal_move) &&
+      no_piece_in_the_way?(location, legal_move) &&
         (legal_move_obj == nil || legal_move_obj.color != self.color) &&
         legal_move.all? { |coord| coord >= 0 && coord <= 8 }
     end

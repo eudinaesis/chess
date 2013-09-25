@@ -170,21 +170,35 @@ class Board
     dup_board
   end
 
+  def self.off_board?(location)
+    location.any? do |coord|
+      coord < 0 || coord > 7
+    end
+  end
+
 end
 
 b = Board.new
 puts b.display
 
-b.move([1, 4], [2, 4])
+b.move([6,4],[5,4])
 puts b.display
 
-b.move([0, 3], [4, 7])
+b.move([1,5],[2,5])
 puts b.display
 
-b.move([4, 7], [6, 5])
+b.move([1,6],[2,6])
 puts b.display
 
-puts "white should be in check now!"
+b.move([2,6],[3,6])
+puts b.display
+
+b.move([7,3],[3,7])
+puts b.display
+
+
 puts "Is White in check? #{b.check?(:white)}"
-
 puts "is White in checkmate? #{b.check_mate?(:white)}"
+
+puts "Is black in check? #{b.check?(:black)}"
+puts "is black in checkmate? #{b.check_mate?(:black)}"
