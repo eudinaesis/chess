@@ -62,8 +62,9 @@ class Board
     }
     background_colors = { 0 => :white, 1 => :light_green }
     # icon_hash.each { |h| puts h.to_s.colorize( :color => :black, :background => :light_green ) }
-    output = ""
+    output = " abcdefgh \n"
     8.times do |row|
+      output << "#{8 - row}"
       8.times do |col|
         # output << " ".colorize(:background => background_colors[(row + col) % 2]) # blank board!
         piece = @squares[row][col]
@@ -74,19 +75,19 @@ class Board
         end
         output << "#{icon_hash[unicode_lookup]}".colorize(:color => :black, :background => background_colors[(row + col) % 2])
       end
-      output << "\n"
+      output << "#{8 - row}\n"
     end
-    output << "\n"
+    output << " abcdefgh\n\n"
     output
   end
 
   def move(old_pos, new_pos)
     moving_piece = @squares[old_pos[0]][old_pos[1]]
-    if moving_piece.is_legal?(old_pos, new_pos)
-      @squares[old_pos[0]][old_pos[1]], @squares[new_pos[0]][new_pos[1]] = nil, moving_piece
-    else
-      raise ArgumentError.new "Invalid move"
-    end
+    # if moving_piece.is_legal?(old_pos, new_pos)
+    @squares[old_pos[0]][old_pos[1]], @squares[new_pos[0]][new_pos[1]] = nil, moving_piece
+    # else
+#       raise ArgumentError.new "Invalid move"
+#     end
   end
 
   #check if color's king is in check
@@ -94,7 +95,7 @@ class Board
     #find color's king
     king_pos = king_pos(color)
     # generates array of opponent piece locations
-    enemy_locations = locations(flip(color))
+    enemy_locations = locations(Board::flip(color))
     #is color's king's position included in any of opposite color's legal moves
     # for each location, get piece there, get legal moves
 
@@ -122,7 +123,7 @@ class Board
     return true
   end
 
-  def flip(color)
+  def self.flip(color)
     color == :white ? :black : :white
   end
 
@@ -178,27 +179,3 @@ class Board
 
 end
 
-b = Board.new
-puts b.display
-
-b.move([6,4],[5,4])
-puts b.display
-
-b.move([1,5],[2,5])
-puts b.display
-
-b.move([1,6],[2,6])
-puts b.display
-
-b.move([2,6],[3,6])
-puts b.display
-
-b.move([7,3],[3,7])
-puts b.display
-
-
-puts "Is White in check? #{b.check?(:white)}"
-puts "is White in checkmate? #{b.check_mate?(:white)}"
-
-puts "Is black in check? #{b.check?(:black)}"
-puts "is black in checkmate? #{b.check_mate?(:black)}"
