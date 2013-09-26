@@ -137,7 +137,7 @@ class Board
   end
 
   def pawn_promote?
-    @squares[0, 7].any? do |row|
+    [@squares[0], @squares[7]].any? do |row|
       row.any? do |piece|
         piece.is_a?(Pawn)
       end

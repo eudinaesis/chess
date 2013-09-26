@@ -53,7 +53,7 @@ class Game
   end
 end
 
-Game.new.play
+# Game.new.play
 
 # b = Board.new
 # puts b.display
@@ -80,4 +80,4 @@ Game.new.play
 # puts "Is black in check? #{b.check?(:black)}"
 # puts "is black in checkmate? #{b.checkmate?(:black)}"
 
-# Game.new.play(Board.test_pawn_promote)
+ Game.new.play(Board.test_pawn_promote)
