@@ -11,4 +11,5 @@ class ChessPiece
     @color = color
     @board = board
   end
+
 end

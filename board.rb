@@ -19,67 +19,26 @@ class Board
     initial_setup unless mode == :copy
   end
 
-  def initial_setup
-    # top row
-    @squares[0][0] = Rook.new(:black, self)
-    @squares[0][1] = Knight.new(:black, self)
-    @squares[0][2] = Bishop.new(:black, self)
-    @squares[0][3] = Queen.new(:black, self)
-    @squares[0][4] = King.new(:black, self)
-    @squares[0][5] = Bishop.new(:black, self)
-    @squares[0][6] = Knight.new(:black, self)
-    @squares[0][7] = Rook.new(:black, self)
-    # 2nd row
-    8.times { |col| @squares[1][col] = Pawn.new(:black, self) }
+  def place_pieces(color)
+    color == :black ? row = 0 : row = 7
+    color == :black ? pawn_row = 1 : pawn_row = 6
 
-    # white pawns
-    8.times { |col| @squares[6][col] = Pawn.new(:white, self) }
-    # bottom row
-    @squares[7][0] = Rook.new(:white, self)
-    @squares[7][1] = Knight.new(:white, self)
-    @squares[7][2] = Bishop.new(:white, self)
-    @squares[7][3] = Queen.new(:white, self)
-    @squares[7][4] = King.new(:white, self)
-    @squares[7][5] = Bishop.new(:white, self)
-    @squares[7][6] = Knight.new(:white, self)
-    @squares[7][7] = Rook.new(:white, self)
+    @squares[row][0] = Rook.new(color, self)
+    @squares[row][1] = Knight.new(color, self)
+    @squares[row][2] = Bishop.new(color, self)
+    @squares[row][3] = Queen.new(color, self)
+    @squares[row][4] = King.new(color, self)
+    @squares[row][5] = Bishop.new(color, self)
+    @squares[row][6] = Knight.new(color, self)
+    @squares[row][7] = Rook.new(color, self)
+
+    8.times { |col| @squares[pawn_row][col] = Pawn.new(color, self) }
   end
 
-  # def display
-  #   icon_hash = {[:King, :white] => "\u2654",
-  #     [:Queen, :white] => "\u2655",
-  #     [:Rook, :white] => "\u2656",
-  #     [:Bishop, :white] => "\u2657",
-  #     [:Knight, :white] => "\u2658",
-  #     [:Pawn, :white] => "\u2659",
-  #     [:King, :black] => "\u265A",
-  #     [:Queen, :black] => "\u265B",
-  #     [:Rook, :black] => "\u265C",
-  #     [:Bishop, :black] => "\u265D",
-  #     [:Knight, :black] => "\u265E",
-  #     [:Pawn, :black] => "\u265F",
-  #     [:blank] => " "
-  #   }
-  #   background_colors = { 0 => :white, 1 => :light_green }
-  #   # icon_hash.each { |h| puts h.to_s.colorize( :color => :black, :background => :light_green ) }
-  #   output = " abcdefgh \n"
-  #   8.times do |row|
-  #     output << "#{8 - row}"
-  #     8.times do |col|
-  #       # output << " ".colorize(:background => background_colors[(row + col) % 2]) # blank board!
-  #       piece = @squares[row][col]
-  #       if piece.nil?
-  #         unicode_lookup = [:blank]
-  #       else
-  #         unicode_lookup = [piece.class.to_s.to_sym, piece.color]
-  #       end
-  #       output << "#{icon_hash[unicode_lookup]}".colorize(:color => :black, :background => background_colors[(row + col) % 2])
-  #     end
-  #     output << "#{8 - row}\n"
-  #   end
-  #   output << " abcdefgh\n\n"
-  #   output
-  # end
+  def initial_setup
+    place_pieces(:black)
+    place_pieces(:white)
+  end
 
   def display
     icon_hash = {[:King, :white] => "\u2654",
@@ -97,12 +56,11 @@ class Board
       [:blank] => " "
     }
     background_colors = { 0 => :white, 1 => :light_green }
-    # icon_hash.each { |h| puts h.to_s.colorize( :color => :black, :background => :light_green ) }
+
     output = " a b c d e f g h \n"
     8.times do |row|
       output << "#{8 - row}"
       8.times do |col|
-        # output << " ".colorize(:background => background_colors[(row + col) % 2]) # blank board!
         piece = @squares[row][col]
         if piece.nil?
           unicode_lookup = [:blank]
@@ -118,11 +76,10 @@ class Board
   end
 
   def move(old_pos, new_pos, color)
-    # have move return true if legit, while changing board
-    # return false if bad, change nothing
-
+    # returns true, and modifies board, if given valid move
+    # otherwise returns false, changing nothing
     if move_ok?(old_pos, new_pos, color)
-      actual_move(old_pos, new_pos)
+      move!(old_pos, new_pos)
       return true
     end
 
@@ -133,22 +90,17 @@ class Board
     !self[old_pos].nil? &&
     self[old_pos].color == color &&
     self[old_pos].is_legal?(old_pos, new_pos) &&
-    !self.deep_dup.actual_move(old_pos, new_pos).check?(color)
+    !self.deep_dup.move!(old_pos, new_pos).check?(color)
   end
 
-  def actual_move(old_pos, new_pos)
+  def move!(old_pos, new_pos)
     self[old_pos], self[new_pos] = nil, self[old_pos]
     self
   end
 
-  #check if color's king is in check
   def check?(color)
-    #find color's king
     king_pos = king_pos(color)
-    # generates array of opponent piece locations
     enemy_locations = locations(Board::flip(color))
-    #is color's king's position included in any of opposite color's legal moves
-    # for each location, get piece there, get legal moves
 
     enemy_locations.any? do |loc|
       enemy_piece = self[loc]
@@ -157,9 +109,11 @@ class Board
   end
 
   #check if color's king is in check mate
-  def check_mate?(color)
-    return false unless check?(color)
+  def checkmate?(color)
+    check?(color) && cannot_move_safely?(color)
+  end
 
+  def cannot_move_safely?(color)
     friendly_locations = locations(color)
 
     friendly_locations.each do |loc|
@@ -168,12 +122,18 @@ class Board
       friendly_piece.possible_moves(loc).each do |move|
         # puts "pawn looking at #{move}" if friendly_piece.class == Pawn
         test_board = deep_dup #done!
-        test_board.actual_move(loc, move)
+
+        test_board.move!(loc, move)
         return false unless test_board.check?(color)
         # is test in check?
       end
     end
     return true
+  end
+
+  def stalemate?(color)
+    #return false if check?(color)
+    !check?(color) && cannot_move_safely?(color)
   end
 
   def self.flip(color)
@@ -222,6 +182,18 @@ class Board
     end
 
     dup_board
+  end
+
+  def test_stalemate
+    dup_board = Board.new(:copy)
+
+    dup_board[[0, 7]] = King.new(:black, dup_board)
+    dup_board[[1, 5]] = King.new(:white, dup_board)
+    dup_board[[2, 6]] = Queen.new(:white, dup_board)
+
+    puts dup_board.display
+    puts "board is stalemate? #{dup_board.stalemate?(:black)}"
+    puts "board is checkmate? #{dup_board.checkmate?(:black)}"
   end
 
   def duplicate_pieces(dup_board, locations, color)
