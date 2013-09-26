@@ -17,6 +17,14 @@ class HumanPlayer < Player
     HumanPlayer::map_format(input[1..2])
   end
 
+  def promotion_choice
+    begin
+      puts "#{self.color.to_s.capitalize} player: what should the pawn become? Q/N/R/B."
+      input = gets.chomp.downcase.match(/\A([qrnb])\z/)
+    end while input.nil?
+    input[1]
+  end
+
   def self.map_format(input_array)
     col_hash = {
       "a" => 0,

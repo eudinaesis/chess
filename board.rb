@@ -136,6 +136,20 @@ class Board
     !check?(color) && cannot_move_safely?(color)
   end
 
+  def pawn_promote?
+    @squares[0, 7].any? do |row|
+      row.any? do |piece|
+        piece.is_a?(Pawn)
+      end
+    end
+  end
+
+  def pawn_promote!(loc, piece)
+    p piece.class
+    self[loc] = piece
+  end
+
+
   def self.flip(color)
     color == :white ? :black : :white
   end
@@ -184,7 +198,21 @@ class Board
     dup_board
   end
 
-  def test_stalemate
+  def self.test_pawn_promote
+    dup_board = Board.new(:copy)
+
+    dup_board[[0, 7]] = King.new(:black, dup_board)
+    dup_board[[1, 5]] = King.new(:white, dup_board)
+    dup_board[[1, 0]] = Pawn.new(:white, dup_board)
+
+    puts dup_board.display
+    # puts "pawn ready to promote? #{dup_board.pawn_promote?}"
+    # dup_board.pawn_promote!([0,0], Queen.new(:white, dup_board))
+    # puts dup_board.display
+    dup_board
+  end
+
+  def self.test_stalemate
     dup_board = Board.new(:copy)
 
     dup_board[[0, 7]] = King.new(:black, dup_board)
