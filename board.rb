@@ -67,7 +67,8 @@ class Board
         else
           unicode_lookup = [piece.class.to_s.to_sym, piece.color]
         end
-        output << "#{icon_hash[unicode_lookup]} ".colorize(:color => :black, :background => background_colors[(row + col) % 2])
+        output << "#{icon_hash[unicode_lookup]} ".colorize(:color => :black,
+                         :background => background_colors[(row + col) % 2])
       end
       output << "#{8 - row}\n"
     end
@@ -118,14 +119,11 @@ class Board
 
     friendly_locations.each do |loc|
       friendly_piece = self[loc]
-      # puts "#{friendly_piece.class} : #{p friendly_piece.possible_moves(loc)}"
       friendly_piece.possible_moves(loc).each do |move|
-        # puts "pawn looking at #{move}" if friendly_piece.class == Pawn
         test_board = deep_dup #done!
 
         test_board.move!(loc, move)
         return false unless test_board.check?(color)
-        # is test in check?
       end
     end
     return true
